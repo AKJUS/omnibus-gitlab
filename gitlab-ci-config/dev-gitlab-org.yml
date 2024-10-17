@@ -65,6 +65,9 @@
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE =~ /_(NIGHTLY|BRANCH)_BUILD_PIPELINE$/'
+    # Include it in TRIGGER_CACHE_UPDATE_PIPELINE pipeline cache used by
+    # nightlies and triggered builds are refreshed periodically
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
 
 .fips_branch_template:
   extends: .branch_template
@@ -73,6 +76,9 @@
   rules:
     - !reference [.default_rules, rules]
     - if: '$PIPELINE_TYPE == "EE_NIGHTLY_BUILD_PIPELINE"'
+    # Include it in TRIGGER_CACHE_UPDATE_PIPELINE pipeline cache used by
+    # nightlies and triggered builds are refreshed periodically
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
     - if: '$PIPELINE_TYPE == "EE_BRANCH_BUILD_PIPELINE"'
       when: manual
       allow_failure: true
@@ -92,6 +98,9 @@
     - if: '$PIPELINE_TYPE == "CE_BRANCH_BUILD_PIPELINE"'
     - if: '$PIPELINE_TYPE == "CE_NIGHTLY_BUILD_PIPELINE"'
     - if: '$PIPELINE_TYPE == "EE_BRANCH_BUILD_PIPELINE" && $CI_PIPELINE_SOURCE == "parent_pipeline"'
+    # Include it in TRIGGER_CACHE_UPDATE_PIPELINE pipeline cache used by
+    # nightlies and triggered builds are refreshed periodically
+    - if: '$PIPELINE_TYPE == "TRIGGER_CACHE_UPDATE_PIPELINE"'
 
 .tag_template:
   stage: package
@@ -287,12 +296,6 @@ Ubuntu-24.04-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_24.04:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
 
-Debian-10-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
-  extends: .branch_template
-Debian-10-arm64-branch:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
-  extends: .arm64_branch_template
 Debian-11-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/debian_11:${BUILDER_IMAGE_REVISION}"
   extends: .branch_template
@@ -376,6 +379,9 @@ AmazonLinux-2-fips-branch:
   extends: .fips_branch_template
 AlmaLinux-8-fips-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/almalinux_8_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_branch_template
+AlmaLinux-9-fips-branch:
+  image: "${BUILDER_IMAGE_REGISTRY}/almalinux_9_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_branch_template
 Ubuntu-20.04-fips-branch:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
@@ -547,12 +553,6 @@ Ubuntu-22.04-arm64-staging:
     - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|NIGHTLY)_BUILD_PIPELINE$/'
 
 ### Package builds
-Debian-10:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10:${BUILDER_IMAGE_REVISION}"
-  extends: .tag_template
-Debian-10-arm64:
-  image: "${BUILDER_IMAGE_REGISTRY}/debian_10_arm64:${BUILDER_IMAGE_REVISION}"
-  extends: .arm64_tag_template
 Debian-11:
   image: "${BUILDER_IMAGE_REGISTRY}/debian_11:${BUILDER_IMAGE_REVISION}"
   extends: .tag_template
@@ -628,6 +628,9 @@ AmazonLinux-2-fips:
 AlmaLinux-8-fips:
   image: "${BUILDER_IMAGE_REGISTRY}/almalinux_8_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_tag_template
+AlmaLinux-9-fips:
+  image: "${BUILDER_IMAGE_REGISTRY}/almalinux_9_fips:${BUILDER_IMAGE_REVISION}"
+  extends: .fips_tag_template
 Ubuntu-20.04-fips:
   image: "${BUILDER_IMAGE_REGISTRY}/ubuntu_20.04_fips:${BUILDER_IMAGE_REVISION}"
   extends: .fips_tag_template
@@ -652,20 +655,6 @@ Docker:
     - if: '$PIPELINE_TYPE =~ /(_RC|_TAG|AUTO_DEPLOY)_BUILD_PIPELINE$/'
 
 ### Staging uploads
-Debian-10-staging:
-  extends: .staging_upload_template
-  needs:
-    - job: Debian-10
-      optional: true
-    - job: Debian-10-branch
-      optional: true
-Debian-10-arm64-staging:
-  extends: .staging_upload_template
-  needs:
-    - job: Debian-10-arm64
-      optional: true
-    - job: Debian-10-arm64-branch
-      optional: true
 Debian-11-staging:
   extends: .staging_upload_template
   needs:
@@ -826,6 +815,13 @@ AlmaLinux-8-fips-staging:
       optional: true
     - job: AlmaLinux-8-fips-branch
       optional: true
+AlmaLinux-9-fips-staging:
+  extends: .fips_staging_upload_template
+  needs:
+    - job: AlmaLinux-9-fips
+      optional: true
+    - job: AlmaLinux-9-fips-branch
+      optional: true
 Ubuntu-20.04-fips-staging:
   extends: .fips_staging_upload_template
   needs:
@@ -859,14 +855,6 @@ Ubuntu-24.04-arm64-release:
   extends: .production_release_template
   needs:
     - Ubuntu-24.04-arm64
-Debian-10-release:
-  extends: .production_release_template
-  needs:
-    - Debian-10
-Debian-10-arm64-release:
-  extends: .production_release_template
-  needs:
-    - Debian-10-arm64
 Debian-11-release:
   extends: .production_release_template
   needs:
@@ -953,6 +941,10 @@ AlmaLinux-8-fips-release:
   extends: .fips_release_template
   needs:
     - AlmaLinux-8-fips
+AlmaLinux-9-fips-release:
+  extends: .fips_release_template
+  needs:
+    - AlmaLinux-9-fips
 Ubuntu-20.04-fips-release:
   extends: .fips_release_template
   needs:
