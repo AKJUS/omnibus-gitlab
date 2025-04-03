@@ -90,6 +90,7 @@ default['gitlab']['gitlab_rails']['gitlab_email_smime_cert_file'] = '/etc/gitlab
 default['gitlab']['gitlab_rails']['gitlab_email_smime_ca_certs_file'] = nil
 default['gitlab']['gitlab_rails']['gitlab_username_changing_enabled'] = nil
 default['gitlab']['gitlab_rails']['gitlab_default_theme'] = nil
+default['gitlab']['gitlab_rails']['gitlab_default_color_mode'] = nil
 default['gitlab']['gitlab_rails']['custom_html_header_tags'] = nil
 default['gitlab']['gitlab_rails']['gitlab_default_projects_features_issues'] = nil
 default['gitlab']['gitlab_rails']['gitlab_default_projects_features_merge_requests'] = nil
@@ -347,6 +348,8 @@ default['gitlab']['gitlab_rails']['omniauth_providers'] = []
 default['gitlab']['gitlab_rails']['omniauth_cas3_session_duration'] = nil
 default['gitlab']['gitlab_rails']['omniauth_allow_bypass_two_factor'] = nil
 default['gitlab']['gitlab_rails']['omniauth_saml_message_max_byte_size'] = nil
+
+default['gitlab']['gitlab_rails']['oidc_provider_openid_id_token_expire_in_seconds'] = nil
 
 default['gitlab']['gitlab_rails']['forti_authenticator_enabled'] = false
 default['gitlab']['gitlab_rails']['forti_authenticator_host'] = nil
